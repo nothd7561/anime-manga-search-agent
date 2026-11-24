@@ -1,0 +1,46 @@
+# Virtual environment
+.venv/
+venv/
+
+# Secrets (commit .env.example only)
+.env
+.env.*
+!.env.example
+
+# Data (raw downloads, processed outputs)
+data/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local embeddings / vector indexes
+*.faiss
+*.index
+*.npy
+*.npz
+*.pkl
+*.pickle
+embeddings/
+indexes/
+
+# Python cache / build
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Claude Code local state
+.claude/scheduled_tasks.lock
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
