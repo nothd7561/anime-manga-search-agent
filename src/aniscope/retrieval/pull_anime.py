@@ -8,10 +8,10 @@ import time
 project_dir = Path(__file__).resolve().parents[3]
 
 query = '''
-            query ($page: Int, $perPage: Int, $type: MediaType) {
+            query ($page: Int, $perPage: Int, $type: MediaType, $country: CountryCode) {
                 Page (page: $page, perPage: $perPage) {
                     pageInfo { currentPage, hasNextPage, perPage, total, lastPage}
-                    media (type: $type, sort: POPULARITY_DESC) {
+                    media (type: $type, countryOfOrigin: $country, sort: POPULARITY_DESC) {
                         id
                         title {
                             romaji
@@ -64,7 +64,7 @@ def save_page(data, path):
         #save the call as a json file
 
 
-def pull_type(media_type, query, max_pages):
+def pull_type(name, media_type, country, query, max_pages):
 
     for page in range(1, max_pages + 1):
 
@@ -78,22 +78,28 @@ def pull_type(media_type, query, max_pages):
         variables = {
             'page': page,
             'perPage' : 50,
-            'type' : f'{media_type.upper()}'
+            'type' : media_type
         }
+
+        if country is not None:
+            variables['country'] = country
+            #if we want a specific country, put that country in as a variable
 
         data = fetch_page(query, variables)
 
         save_page(data, save_path)
+        print(f'Getting page {page:03d}!')
 
         if data['data']['Page']['pageInfo']['hasNextPage'] == False:
             break #stop the code if there is no next page from the current page
-        
-        print(f'Getting page {page:03d}!')
+
         time.sleep(4)
         #wait for 4 seconds before going to the next iteration/making next request
 
 
 if __name__ == "__main__":
 
-    pull_type('anime', query, 2)
-    pull_type('manga', query, 2)
+    pull_type('anime',  'ANIME', None, query, 40)
+    pull_type('manga',  'MANGA', 'JP', query, 60)
+    pull_type('manhwa', 'MANGA', 'KR', query, 40)
+
