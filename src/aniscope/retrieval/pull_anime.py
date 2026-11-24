@@ -68,7 +68,7 @@ def pull_type(name, media_type, country, query, max_pages):
 
     for page in range(1, max_pages + 1):
 
-        save_path = project_dir / 'data' / 'raw' / f'{media_type}' / f'anilist_{media_type}_p{page:03d}.json'
+        save_path = project_dir / 'data' / 'raw' / f'{name}' / f'anilist_{name}_p{page:03d}.json'
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         if save_path.exists():
