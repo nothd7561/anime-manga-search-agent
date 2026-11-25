@@ -82,17 +82,15 @@ def transform_record(record: dict):
 
     tag_rows = []
     for tag in record['tags']:
-        tag_rows.append((tag['name'], tag['rank'], tag))
+        tag_rows.append((record['id'],tag['name'], tag['rank'], ))
 
     return media_dict, genre_rows, tag_rows
 
-
-if __name__ == "__main__":
+def transform_all(sources: list):
     media_rows = []
     genre_rows = []
     tag_rows = []
 
-    sources = ['anime', 'manga', 'manhwa']
     for source in sources:
         title_records = read_raw_records(source)
         for title in title_records:
@@ -101,14 +99,29 @@ if __name__ == "__main__":
             media_rows.append(media_dict)
             genre_rows.extend(genre_list)
             tag_rows.extend(tag_list)
+    return media_rows, genre_rows, tag_rows
 
-    print(len(media_rows), len(genre_rows), len(tag_rows))
 
-    empty_desc = 0
+
+if __name__ == "__main__":
+    sources = ['anime', 'manga', 'manhwa']
+
+    media_rows, genre_rows, tag_rows = transform_all(sources)
+
+    print('rows (media, genres, tags):', len(media_rows), len(genre_rows), len(tag_rows))
+
+    print('empty descriptions:', sum(1 for row in media_rows if row['description_clean'] is None))
+
+    genre_ids = {row[0] for row in genre_rows}
+    print('titles with no genres:', sum(1 for row in media_rows if row['id'] not in genre_ids))
+
+    print('unique media ids:', len({row['id'] for row in media_rows}))
+    print('duplicate genre rows:', len(genre_rows) - len(set(genre_rows)))
+
+    tag_keys = {(row[0], row[1]) for row in tag_rows}
+    print('duplicate tag rows:', len(tag_rows) - len(tag_keys))
+    print('tags with no rank:', sum(1 for row in tag_rows if row[2] is None))
+
     for row in media_rows:
-        if row['description_clean'] is None:
-            empty_desc += 1
-    print(empty_desc)
-    #count how many titles have an empty description
-
-    print(len(genre_rows) - len(set(genre_rows)))
+        if row['id'] not in genre_ids:
+            print(row['id'], row['title_romaji'], row['type'], row['format'], row['site_url'])
