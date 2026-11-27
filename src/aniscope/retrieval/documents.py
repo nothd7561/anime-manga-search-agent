@@ -18,7 +18,7 @@ tags_query = '''
     FROM tags
     ORDER BY media_id, rank DESC'''
 
-def load_documents(db_path, media_query, genre_query, tags_query, top_tags: int):
+def load_documents(db_path, media_query, genre_query, tags_query, top_tags: int = 15):
     #creates a dictionary of each titles id (key) mapped to its combined text
 
     connection = sqlite3.connect(db_path)
