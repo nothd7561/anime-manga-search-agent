@@ -48,20 +48,40 @@ def load_or_build_embeddings(emb_path, ids_path, documents: dict):
     save_embeddings(emb_path, ids_path, ids, embeddings)
     return ids, embeddings
 
-def build_faiss_index(embedding: list):
+def build_faiss_index(embeddings: np.ndarray):
     #run faiss over the vectors. faiss is a vector search up algorithm for large datasets
-    
+
     dim = embeddings.shape[1]            #returns the column dimension (384)
-    index = faiss.IndexFlatIP(dim)       #an empty index for vectors of length 384
+    index = faiss.IndexFlatIP(dim)       #an empty container that will hold vectors of length 384 and knows how to search them
     index.add(embeddings)                #load all 7,000 vectors into the empty index
     
     return index
 
-def search_semantic():
+def search_semantic(index, model, ids: list, titles: dict, query: str, k: int):
     #embed the query, ask FAISS for the top k results, return the (id, name, score)
-    pass
+
+    query_vector = model.encode([query], normalize_embeddings=True) #encode the query
+    scores, positions = index.search(query_vector, k) #
+
+    results = []
+    for pos, score in zip(positions[0], scores[0]):
+        title_id = ids[pos]
+        name = titles[title_id]
+        results.append((title_id, name, round(float(score), 2)))
+    return results 
 
 if __name__ == "__main__":
     documents, titles = load_documents(db_path, media_query, genre_query, tags_query, 15)
     ids, embeddings = load_or_build_embeddings(emb_path, ids_path, documents)
     print(len(ids), embeddings.shape)
+    index = build_faiss_index(embeddings)
+    print(index.ntotal)
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    queries = ['revenge dark fantasy', 'time loop romance', 'cooking competition',
+           'reincarnated villain', 'slow burn mystery', 'vengeance',
+           'reborn as the antagonist']
+    for query in queries:
+        print(f'\n{query}')
+        for title_id, name, score in search_semantic(index, model, ids, titles, query, 5):
+            print(f'  {score:6.2f}  {name}  (id {title_id})')
