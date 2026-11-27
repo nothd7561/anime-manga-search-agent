@@ -3,6 +3,7 @@ import sqlite3
 from collections import defaultdict
 import re
 from rank_bm25 import BM25Okapi
+from documents import load_documents, db_path, media_query, genre_query, tags_query
 ###the normal baseline
 
 
